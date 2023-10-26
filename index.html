@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Campo Minado</title>
+    <style>
+        body {
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        
+        h1 {
+            color: #FE7E02;
+            margin-bottom: 20px;
+            /* Espaçamento abaixo do título */
+            padding-left: 50px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            /* Duas linhas: uma para o título, outra para o jogo */
+            align-items: center;
+        }
+        
+        .dividir {
+            margin-top: 70px;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            gap: 2px;
+        }
+        
+        .cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #fff;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 20px;
+            cursor: pointer;
+            background-image: url('agua.jpg');
+            /* Imagem para célula vazia */
+            background-size: cover;
+        }
+        
+        .mine {
+            background-image: url('images/fanta.png');
+            /* Imagem para célula com navio */
+            background-size: cover;
+        }
+        
+        .footer-image {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            max-width: 100%;
+            /* Torna a imagem responsiva */
+            height: auto;
+            /* Mantém a proporção da imagem */
+        }
+        
+        @media (max-width: 1010px) {
+            .footer-image {
+                max-width: 50%;
+                /* Reduza o tamanho da imagem para 50% */
+                height: auto;
+                /* Mantém a proporção da imagem */
+                position: static;
+                /* Remove a posição absoluta */
+            }
+        }
+        
+        @media (max-width: 330px) {
+            h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+                /* Ajuste o espaço abaixo do título */
+                padding: 0;
+                /* Remova o preenchimento */
+            }
+            .board {
+                grid-template-columns: repeat(5, 30px);
+            }
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+            }
+            .container {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Fanta Minada</h1>
+        <div class="dividir">
+            <div class="board" id="board"></div>
+        </div>
+    </div>
+
+    <img class="footer-image" src="images/fanta1.png" alt="Imagem no canto inferior direito">
+    <script>
+        const board = document.getElementById("board");
+        const rows = 10;
+        const cols = 10;
+        const mines = 20;
+        const grid = new Array(rows).fill(0).map(() => new Array(cols).fill(0));
+
+        // Definindo o tempo em milissegundos (5 minutos)
+        const gameTime = 5 * 60 * 1000; // 5 minutos em milissegundos
+        let gameTimer;
+
+        // Função para iniciar o jogo
+        function startGame() {
+            addMines();
+            createBoard();
+            // Iniciar o temporizador
+            gameTimer = setTimeout(gameOver, gameTime);
+        }
+
+        // Função para encerrar o jogo
+        function gameOver() {
+            const playAgain = confirm("Game Over! Tempo Esgotado. Deseja jogar novamente?");
+            if (playAgain) {
+                // Limpar o tabuleiro e reiniciar
+                clearBoard();
+                startGame();
+            } else {
+                alert("Obrigado por jogar! Recarregue a página para começar de novo.");
+            }
+        }
+
+        // Função para limpar o tabuleiro
+        function clearBoard() {
+            board.innerHTML = "";
+        }
+
+        // Function to add mines randomly
+        function addMines() {
+            let minesPlaced = 0;
+            while (minesPlaced < mines) {
+                const row = Math.floor(Math.random() * rows);
+                const col = Math.floor(Math.random() * cols);
+                if (grid[row][col] !== -1) {
+                    grid[row][col] = -1; // -1 represents a mine
+                    minesPlaced++;
+                }
+            }
+        }
+
+        // Function to initialize the game board
+        function createBoard() {
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("cell");
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        // Add click event listener for each cell
+        board.addEventListener("click", (e) => {
+            const cell = e.target;
+            const row = cell.dataset.row;
+            const col = cell.dataset.col;
+            if (grid[row][col] === -1) {
+                cell.style.backgroundColor = "#FE7E02"; // Hit a mine
+                cell.style.backgroundImage = "images/fanta.png";
+                alert("Game Over! Saboreie o Refrescante Sabor da Fanta Mistério - A Escolha dos Campeões!");
+            } else {
+                const minesAround = countMinesAround(row, col);
+                cell.innerText = minesAround;
+                cell.style.backgroundColor = "lightgray";
+            }
+        });
+
+        // Function to count mines around a cell
+        function countMinesAround(row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const newRow = +row + i;
+                    const newCol = +col + j;
+                    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+                        if (grid[newRow][newCol] === -1) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
+        // Initialize the game
+        addMines();
+        createBoard();
+    </script>
+</body>
+
+</html>
